@@ -24,6 +24,12 @@ pip install -r requirements.txt
 python scan_spring.py root-folder [-quiet] [-exclude folder1 folder2 ..]
 ```
 
+or
+
+```
+python scan_spring.py root-archive [-quiet] [-exclude folder1 folder2 ..]
+```
+
 The tool will scan `root_folder` recursively for `.jar` and `.war` files; in each located archive the tool examines the `.class` files for methods annotated with `RequestMapping`, and reports the occurrence if the argument types of the method are not primitive.
 
 With `-quiet` flag, error messages (files not found/ archives failed to open/ password protected archives) are muted.
