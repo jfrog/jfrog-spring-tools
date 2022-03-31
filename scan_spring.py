@@ -57,6 +57,9 @@ ALLOWED_TYPES = {
     "java/io/Reader",
     "java/io/Writer",
     "java/util/Map",
+    "org/springframework/ui/Model",
+    "org/springframework/ui/ModelMap",
+
 }  # TO BE UPDATED
 
 CLASSES_EXEMPTLIST = {"org/springframework/boot"}
