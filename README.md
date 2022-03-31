@@ -32,8 +32,10 @@ or
 python scan_spring.py root-archive [-quiet] [-exclude folder1 folder2 ..]
 ```
 
-The tool will scan `root_folder` recursively for `.jar` and `.war` files; in each located archive the tool examines the `.class` files for methods annotated with `RequestMapping`, and reports the occurrence if the argument types of the method are not primitive.
+The tool will scan `root_folder` recursively for `.jar` and `.war` files; in each located archive the tool examines the `.class` files for methods annotated with `RequestMapping` / `GetMapping` /`PostMapping` etc., and reports the occurrence if the argument types of the method are not primitive.
 
 With `-quiet` flag, error messages (files not found/ archives failed to open/ password protected archives) are muted.
 
 Folders appearing after `-exclude` (optional) are skipped.
+
+<img src="img/example.PNG" alt="example" style="zoom:33%;" />
