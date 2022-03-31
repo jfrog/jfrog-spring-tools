@@ -2,11 +2,9 @@
 
 ### Overview
 
-SpringShell vulnerability may affect **some** applications using Spring-boot, but requires a number of preconditoins to be exploitable. One specific condition which may be rather rare (and therefore render most applications non-exploitable in practice) is the existence of Spring endpoints which accept a non-primitive (Java Bean) type. This tool can be used to scan **compiled** code and verify whether such endpoints exist in the codebase.
+The SpringShell vulnerability may affect **some** web applications using Spring Framework, but requires a number of conditions to be exploitable. One specific condition which may be rather rare (and therefore render most applications non-exploitable in practice) is the existence of Spring endpoints which bind request parameters to a non-primitive (Java Bean) type. This tool can be used to scan **compiled** code and verify whether such endpoints exist in the codebase.
 
-Currently this alerts on non-primitive arguments. As the precise list of vulnerable types becomes clearer, the tool will be updated.
-
-
+Currently this alerts on all non-primitive arguments. As the precise list of vulnerable types becomes clearer, the tool will be updated.
 
 ------
 
@@ -14,7 +12,7 @@ Currently this alerts on non-primitive arguments. As the precise list of vulnera
 
 ### `scan_spring.py`
 
-The tool requires Python 3, without additional dependencies.
+The tool requires Python 3.
 
 ##### Dependencies installation
 
