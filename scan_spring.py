@@ -42,6 +42,21 @@ ALLOWED_TYPES = {
     "java/util/Locale",
     "java/net/URI",
     "java/net/URL",
+    "org/springframework/web/context/request/NativeWebRequest",
+    "org/springframework/web/context/request/WebRequest",
+    "javax/servlet/http/HttpServletResponse",
+    "javax/servlet/http/HttpServletRequest",
+    "javax/servlet/http/HttpSession",
+    "javax/servlet/http/PushBuilder",
+    "java/security/Principal",
+    "org/springframework/http/HttpMethod",
+    "java/time/TimeZone",
+    "java/time/ZoneId",
+    "java/io/InputStream",
+    "java/io/OutputStream",
+    "java/io/Reader",
+    "java/io/Writer",
+    "java/util/Map",
 }  # TO BE UPDATED
 
 CLASSES_EXEMPTLIST = {"org/springframework/boot"}
