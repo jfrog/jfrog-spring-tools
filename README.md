@@ -4,6 +4,10 @@
 
 SpringShell vulnerability may affect **some** applications using Spring-boot, but requires a number of preconditoins to be exploitable. One specific condition which may be rather rare (and therefore render most applications non-exploitable in practice) is the existence of Spring endpoints which accept a non-primitive (Java Bean) type. This tool can be used to scan **compiled** code and verify whether such endpoints exist in the codebase.
 
+Currently this alerts on non-primitive arguments. As the precise list of vulnerable types becomes clearer, the tool will be updated.
+
+
+
 ------
 
 ## Usage instructions

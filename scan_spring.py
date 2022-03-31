@@ -29,7 +29,20 @@ ANNOTATION_STRS = {
 
 ANNOTATION_STRSs = {s.decode("utf-8") for s in ANNOTATION_STRS}
 
-ALLOWED_TYPES = {"java/lang/String", 'boolean', 'long', 'int'} # ????
+ALLOWED_TYPES = {
+    "java/lang/String",
+    "boolean",
+    "long",
+    "int",
+    "java/lang/CharSequence",
+    "java/lang/Number",
+    "java/time/temporal/Temporal",
+    "java/time/DateTime",
+    "java/util/ArrayList",
+    "java/util/Locale",
+    "java/net/URI",
+    "java/net/URL",
+}  # TO BE UPDATED
 
 CLASSES_EXEMPTLIST = {"org/springframework/boot"}
 
@@ -56,7 +69,7 @@ def check_method_annotations(c, req_constants):
 def examine_class(rel_path, file_name, content, silent_mode):
     try:
         cl = ClassFile(BytesIO(content))
-    except: # IndexError, but I don't trust jawa not to throw someting else
+    except:  # IndexError, but I don't trust jawa not to throw someting else
         if not silent_mode:
             print("Could not open class: %s" % file_name)
         return
@@ -69,7 +82,11 @@ def examine_class(rel_path, file_name, content, silent_mode):
     for method_name, arg_type_names in check_method_annotations(
         cl, annotation_constants
     ):
-        bad_arg_type_names = [arg_type_name for arg_type_name in arg_type_names if arg_type_name not in ALLOWED_TYPES]
+        bad_arg_type_names = [
+            arg_type_name
+            for arg_type_name in arg_type_names
+            if arg_type_name not in ALLOWED_TYPES
+        ]
         if bad_arg_type_names:
             print(
                 "In %s/%s%s%s: endpoint method %s%s%s accepts %s\n\n"
