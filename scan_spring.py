@@ -19,7 +19,7 @@ ZIP_EXTENSIONS = {".jar", ".war", ".sar", ".ear", ".par", ".zip", ".apk"}
 TAR_EXTENSIONS = {".tar.gz", ".tar"}
 
 ANNOTATION_STRS = {
-    b"annotation/RequestMapping;",
+    b"annotation/RequestMapping",
     b"annotation/GetMapping",
     b"annotation/PostMapping",
     b"annotation/PutMapping",
@@ -92,7 +92,7 @@ def examine_class(rel_path, file_name, content, silent_mode):
             print("Could not open class: %s" % file_name)
         return
 
-    annotation_constants = get_annotation_constants(cl)
+    annotation_constants = list(get_annotation_constants(cl))
 
     if not annotation_constants:
         return
