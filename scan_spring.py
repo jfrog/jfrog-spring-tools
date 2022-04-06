@@ -59,7 +59,6 @@ ALLOWED_TYPES = {
     "java/util/Map",
     "org/springframework/ui/Model",
     "org/springframework/ui/ModelMap",
-
 }  # TO BE UPDATED
 
 CLASSES_EXEMPTLIST = {"org/springframework/boot"}
@@ -84,18 +83,19 @@ def check_method_annotations(c, req_constants):
                     yield (method.name.value, {arg.name for arg in method.args})
 
 
-def examine_class(rel_path, file_name, content, silent_mode):
+def examine_class(rel_path, file_name, content, silent_mode) -> bool:
+    problem_found = False
     try:
         cl = ClassFile(BytesIO(content))
     except:  # IndexError, but I don't trust jawa not to throw someting else
         if not silent_mode:
             print("Could not open class: %s" % file_name)
-        return
+        return False
 
     annotation_constants = list(get_annotation_constants(cl))
 
     if not annotation_constants:
-        return
+        return False
 
     for method_name, arg_type_names in check_method_annotations(
         cl, annotation_constants
@@ -106,6 +106,7 @@ def examine_class(rel_path, file_name, content, silent_mode):
             if arg_type_name not in ALLOWED_TYPES
         ]
         if bad_arg_type_names:
+            problem_found = True
             print(
                 "In %s/%s%s%s: endpoint method %s%s%s accepts %s\n\n"
                 % (
@@ -119,16 +120,20 @@ def examine_class(rel_path, file_name, content, silent_mode):
                     ", ".join(bad_arg_type_names),
                 )
             )
+    return problem_found
 
 
-def zip_file(file, rel_path: str, silent_mode: bool):
+def zip_file(file, rel_path: str, silent_mode: bool) -> bool:
+    problem_found = False
     try:
         with ZipFile(file) as jarfile:
             for file_name in jarfile.namelist():
                 if acceptable_filename(file_name):
-                    next_file = jarfile.open(file_name, "r")
-                    test_file(next_file, os.path.join(rel_path, file_name), silent_mode)
-                    continue
+                    with jarfile.open(file_name, "r") as next_file:
+                        problem_found |= test_file(
+                            next_file, os.path.join(rel_path, file_name), silent_mode
+                        )
+                        continue
                 if (
                     file_name.endswith(".class")
                     and not file_name.endswith("module-info.class")
@@ -139,16 +144,19 @@ def zip_file(file, rel_path: str, silent_mode: bool):
                 ):
                     content = jarfile.read(file_name)
                     if any(substr in content for substr in ANNOTATION_STRS):
-                        examine_class(rel_path, file_name, content, silent_mode)
+                        problem_found |= examine_class(
+                            rel_path, file_name, content, silent_mode
+                        )
 
             # went over all the files in the current layer; draw conclusions
     except (IOError, BadZipFile, UnicodeDecodeError, zlib.error, RuntimeError) as e:
         if not silent_mode:
             print(rel_path + ": " + str(e))
-        return
+    return problem_found
 
 
-def tar_file(file, rel_path: str, silent_mode: bool):
+def tar_file(file, rel_path: str, silent_mode: bool) -> bool:
+    problem_found = False
     try:
         with tar_open(fileobj=file) as tarfile:
             for item in tarfile.getmembers():
@@ -157,7 +165,7 @@ def tar_file(file, rel_path: str, silent_mode: bool):
                 if item.isfile() and acceptable_filename(item.name):
                     fileobj = tarfile.extractfile(item)
                     new_path = rel_path + "/" + item.name
-                    test_file(fileobj, new_path, silent_mode)
+                    problem_found |= test_file(fileobj, new_path, silent_mode)
 
     except (
         IOError,
@@ -170,22 +178,24 @@ def tar_file(file, rel_path: str, silent_mode: bool):
     ) as e:
         if not silent_mode:
             print(rel_path + ": " + str(e))
-        return
+        return False
+    return problem_found
 
 
-def test_file(file, rel_path: str, silent_mode: bool):
+def test_file(file, rel_path: str, silent_mode: bool) -> bool:
     if any(rel_path.endswith(ext) for ext in ZIP_EXTENSIONS):
-        zip_file(file, rel_path, silent_mode)
+        return zip_file(file, rel_path, silent_mode)
 
     elif any(rel_path.endswith(ext) for ext in TAR_EXTENSIONS):
-        tar_file(file, rel_path, silent_mode)
-
+        return tar_file(file, rel_path, silent_mode)
+    return False
 
 def acceptable_filename(filename: str):
     return any(filename.endswith(ext) for ext in ZIP_EXTENSIONS | TAR_EXTENSIONS)
 
 
-def run_scanner(root_dir: str, exclude_dirs, silent_mode: bool):
+def run_scanner(root_dir: str, exclude_dirs, silent_mode: bool) -> bool:
+    problem_found = False
     if os.path.isdir(root_dir):
         for directory, dirs, files in os.walk(root_dir, topdown=True):
             [
@@ -200,7 +210,7 @@ def run_scanner(root_dir: str, exclude_dirs, silent_mode: bool):
                     rel_path = os.path.relpath(full_path, root_dir)
                     try:
                         with open(full_path, "rb") as file:
-                            test_file(file, rel_path, silent_mode)
+                            problem_found |= test_file(file, rel_path, silent_mode)
                     except FileNotFoundError as fnf_error:
                         if not silent_mode:
                             print(fnf_error)
@@ -208,11 +218,11 @@ def run_scanner(root_dir: str, exclude_dirs, silent_mode: bool):
         if acceptable_filename(root_dir):
             with open(root_dir, "rb") as file:
                 if any(root_dir.endswith(ext) for ext in ZIP_EXTENSIONS):
-                    zip_file(file, "", silent_mode)
+                    problem_found = zip_file(file, "", silent_mode)
 
                 elif any(root_dir.endswith(ext) for ext in TAR_EXTENSIONS):
-                    tar_file(file, "", silent_mode)
-
+                    problem_found = tar_file(file, "", silent_mode)
+    return problem_found
 
 def print_usage():
     print(
@@ -258,4 +268,6 @@ if __name__ == "__main__":
     if exclude_dirs:
         print("Excluded: " + ", ".join(exclude_dirs))
 
-    run_scanner(root_dir, set(exclude_dirs), silent_mode)
+    problem_found = run_scanner(root_dir, set(exclude_dirs), silent_mode)
+    if problem_found:
+        sys.exit(1)
