@@ -210,7 +210,7 @@ def run_scanner(root_dir: str, exclude_dirs, silent_mode: bool):
                 if any(root_dir.endswith(ext) for ext in ZIP_EXTENSIONS):
                     zip_file(file, "", silent_mode)
 
-                elif any(rel_path.endswith(ext) for ext in TAR_EXTENSIONS):
+                elif any(root_dir.endswith(ext) for ext in TAR_EXTENSIONS):
                     tar_file(file, "", silent_mode)
 
 

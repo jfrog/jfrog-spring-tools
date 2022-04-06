@@ -2,7 +2,7 @@
 
 ### Overview
 
-The SpringShell vulnerability may affect **some** web applications using Spring Framework, but requires a number of conditions to be exploitable. One specific condition which may be rather rare (and therefore render most applications non-exploitable in practice) is the existence of Spring endpoints which bind request parameters to a non-primitive (Java Bean) type. This tool can be used to scan **compiled** code and verify whether such endpoints exist in the codebase.
+The SpringShell (CVE-2022-22965) vulnerability may affect **some** web applications using Spring Framework, but requires a number of conditions to be exploitable. One specific condition which may be rather rare (and therefore render most applications non-exploitable in practice) is the existence of Spring endpoints which bind request parameters to a non-primitive (Java Bean) type. This tool can be used to scan **compiled** code and verify whether such endpoints exist in the codebase.
 
 Currently this alerts on all non-primitive arguments. As the precise list of vulnerable types becomes clearer, the tool will be updated.
 
